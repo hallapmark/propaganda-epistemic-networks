@@ -3,7 +3,6 @@ from abc import abstractmethod
 
 class BayesianAgent(DoxasticAgent):
     def __init__(self, **kw):
-        print(f"Init BayesianAgent.")
         super().__init__(**kw)
     
     @abstractmethod

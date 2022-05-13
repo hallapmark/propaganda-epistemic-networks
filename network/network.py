@@ -1,5 +1,4 @@
 from agents.binomialethicalscientist import BinomialEthicalScientist
-from agents.experimenters.binomialexperimenter import BinomialExperimenter
 import numpy as np
 from enum import Enum, auto
 from typing import List
@@ -9,7 +8,7 @@ class ENetworkType(Enum):
    WHEEL = auto()
    CYCLE = auto()
 
-class EpistemicNetworkForBinomials():
+class EpistemicNetworkForBinomialUpdating():
     def __init__(self,
                  scientist_popcount: int,
                  scientist_network_type: ENetworkType,
@@ -33,34 +32,38 @@ class EpistemicNetworkForBinomials():
         # if they themselves are no longer experimenting?
         self._structure_scientific_network(self.scientists, scientist_network_type)
 
+    ## Interface
+    def enetwork_play_round(self):
+        for scientist in self.scientists:
+            scientist.decide_round_research_action()
+
+    ## Private methods
     def _structure_scientific_network(self,
-                                     bayes_updaters: List[BinomialEthicalScientist],
-                                     network_type: ENetworkType):
+                                      bayes_updaters: List[BinomialEthicalScientist],
+                                      network_type: ENetworkType):
         match network_type:
             case ENetworkType.COMPLETE:
                 for updater in bayes_updaters:
-                    self.add_bayes_influencers_for_updater(updater, bayes_updaters)
+                    self._add_all_bayes_influencers_for_updater(updater, bayes_updaters)
                 print("Initialising a complete network.")
             case ENetworkType.WHEEL:
-                print("We are wheeling it")  # Not implemented for now
+                print("We are wheeling it.")  # Not implemented for now
             case ENetworkType.CYCLE:
                 for i, updater in enumerate(bayes_updaters):
-                    updater.add_bayes_influencer(bayes_updaters[i-1])
-                    updater.add_bayes_influencer(bayes_updaters[i])
-                    updater.add_bayes_influencer(
-                        bayes_updaters[(i + 1) % self.scientist_popcount])
+                    self._add_cycle_bayes_influencers_for_updater(updater, i, bayes_updaters)
             case _:
-                print("Invalid state.")
+                print("Invalid. All ENetworkType need to be specifically matched.")
 
-    def add_bayes_influencers_for_updater(self,
+    def _add_all_bayes_influencers_for_updater(self,
                                           updater: BinomialEthicalScientist,
                                           experimenters: List[BinomialEthicalScientist]):
         for experimenter in experimenters:
             updater.add_bayes_influencer(experimenter)
-
-
-if __name__ == "__main__":
-    rng = np.random.default_rng(253591)
-    # params = [10, ENetworkType.COMPLETE, 100, 0.01, 0.5, rng]
-    network = EpistemicNetworkForBinomials(10, ENetworkType.COMPLETE, 100, 0.01, 0.5, rng)
     
+    def _add_cycle_bayes_influencers_for_updater(self, 
+                                                updater: BinomialEthicalScientist,
+                                                i: int,
+                                                experimenters: List[BinomialEthicalScientist]):
+        updater.add_bayes_influencer(experimenters[i-1])
+        updater.add_bayes_influencer(experimenters[i])
+        updater.add_bayes_influencer(experimenters[(i + 1) % self.scientist_popcount])

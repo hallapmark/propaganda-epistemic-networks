@@ -10,11 +10,9 @@ from typing import List
 """ A Bayesian updater who knows how to update on binomial distributions."""
 class BayesianBinomialUpdater(BayesianAgent):
     def __init__(self, epsilon: float, **kw):
-        print(f"Init BayesianBinomialUpdater.")
         super().__init__(**kw)
         self.epsilon = epsilon
-        # Influencers can include self (usually, it would be odd if it did not)
-        # Add Type to allows subclasses, lists and protocols do not mix well otherwise
+        # Influencers can include self
         self.bayes_influencers: List[BinomialExperimenter] = []
         # In the future, we can also add jeffrey influencers whose data the updater
         # does not fully trust.

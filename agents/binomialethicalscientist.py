@@ -1,4 +1,4 @@
-from numpy import random
+import numpy as np
 from agents.bayesianupdaters.bayesianbinomialupdater import BayesianBinomialUpdater
 from agents.crsupervisor import CredenceBasedSupervisor
 from agents.experimenters.binomialexperimenter import BinomialExperiment
@@ -17,21 +17,22 @@ class BinomialEthicalScientist(BayesianBinomialUpdater, CredenceBasedSupervisor)
     
     # CredenceBasedSupervisor mandatory method implementations
     def _stop_action(self):
-        print(f'Stop action ran!')
         self.binomial_experiment = None
-        # TODO: Do we not still update here even if we do not experiment?
+        self._finally()
     
     def _continue_action(self):
         self._experiment(self.n_per_round, self.epsilon)
+        self._finally()
+        
+    def _finally(self):
         self.bayes_update_credence()
-    
+
     # BinomialExperimenter implementation
     def get_experiment_data(self) -> Optional[BinomialExperiment]:
         return self.binomial_experiment
         
     # Experiment
     def _experiment(self, n: int, epsilon):
-        self.k = random.binomial(n, 0.5 + epsilon)
-        print(f'Experiment ran. k = {self.k}, n = {self.n}')
+        k = np.random.binomial(n, 0.5 + epsilon)
+        self.binomial_experiment = BinomialExperiment(k, n)
     
-
