@@ -12,17 +12,15 @@ class BayesianBinomialUpdater(BayesianAgent):
     def __init__(self, epsilon: float, **kw):
         print(f"Init BayesianBinomialUpdater.")
         super().__init__(**kw)
-        # k is optional because some binomial updaters will run their own experiments after
-        # initialization
         self.epsilon = epsilon
         # Influencers can include self (usually, it would be odd if it did not)
+        # Add Type to allows subclasses, lists and protocols do not mix well otherwise
         self.bayes_influencers: List[BinomialExperimenter] = []
         # In the future, we can also add jeffrey influencers whose data the updater
         # does not fully trust.
         
-    def add_bayes_influencers(self, influencers: List[BinomialExperimenter]):
-        for influencer in influencers:
-            self.bayes_influencers.append(influencer)
+    def add_bayes_influencer(self, influencer: BinomialExperimenter):
+        self.bayes_influencers.append(influencer)
 
     # Public interface
     # Superclass mandatory method implementation

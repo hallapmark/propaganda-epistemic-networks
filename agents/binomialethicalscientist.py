@@ -13,7 +13,7 @@ class BinomialEthicalScientist(BayesianBinomialUpdater, CredenceBasedSupervisor)
                          stop_threshold = stop_threshold,
                          prior = prior)
         self.n_per_round = n_per_round
-        self._binomial_experiment: Optional[BinomialExperiment] = None
+        self.binomial_experiment: Optional[BinomialExperiment] = None
     
     # CredenceBasedSupervisor mandatory method implementations
     def _stop_action(self):
@@ -27,7 +27,7 @@ class BinomialEthicalScientist(BayesianBinomialUpdater, CredenceBasedSupervisor)
     
     # BinomialExperimenter implementation
     def get_experiment_data(self) -> Optional[BinomialExperiment]:
-        return self._binomial_experiment
+        return self.binomial_experiment
         
     # Experiment
     def _experiment(self, n: int, epsilon):
