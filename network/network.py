@@ -8,7 +8,7 @@ class ENetworkType(Enum):
    WHEEL = auto()
    CYCLE = auto()
 
-class EpistemicNetworkForBinomialUpdating():
+class ENetworkForBinomialUpdating():
     def __init__(self,
                  scientist_popcount: int,
                  scientist_network_type: ENetworkType,
@@ -45,7 +45,6 @@ class EpistemicNetworkForBinomialUpdating():
             case ENetworkType.COMPLETE:
                 for updater in bayes_updaters:
                     self._add_all_bayes_influencers_for_updater(updater, bayes_updaters)
-                print("Initialising a complete network.")
             case ENetworkType.WHEEL:
                 print("We are wheeling it.")  # Not implemented for now
             case ENetworkType.CYCLE:

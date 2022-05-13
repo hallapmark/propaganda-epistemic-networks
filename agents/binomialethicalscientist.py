@@ -8,7 +8,6 @@ from typing import Optional
 experimenting when credence is below a certain threshold."""
 class BinomialEthicalScientist(BayesianBinomialUpdater, CredenceBasedSupervisor): 
     def __init__(self, n_per_round: int, epsilon: float, stop_threshold: float, prior: float):
-        print(f"Init BinomialEthicalScientist. Credence: {prior}")
         super().__init__(epsilon = epsilon,
                          stop_threshold = stop_threshold,
                          prior = prior)

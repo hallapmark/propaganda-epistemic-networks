@@ -8,11 +8,8 @@ class CredenceBasedSupervisor(DoxasticAgent):
 
     def decide_round_research_action(self):
         if self.credence < self._stop_threshold:
-            # TODO: Remove print statements
-            print(f"Credence {self.credence} in hypothesis is low. Stop experimenting!")
             self._stop_action()
         else:
-            print(f"Credence {self.credence} in hypothesis is over the threshold. Continue research!")
             self._continue_action()
     
     @abstractmethod
