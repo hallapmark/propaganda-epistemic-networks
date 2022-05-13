@@ -7,7 +7,7 @@ class BayesianAgent(DoxasticAgent):
         super().__init__(**kw)
     
     @abstractmethod
-    def bayes_update_credence(self) -> bool:
+    def bayes_update_credence(self):
         """ Updates the agent's credence in H given certain evidence E using Bayes' rule:
         posterior = (credence * likelihood) / marginal_likelihood."""
         return NotImplementedError

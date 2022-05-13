@@ -1,7 +1,7 @@
 from numpy import random
 from agents.bayesianupdaters.bayesianbinomialupdater import BayesianBinomialUpdater
 from agents.crsupervisor import CredenceBasedSupervisor
-from experimenters.binomialexperimenter import BinomialExperiment
+from agents.experimenters.binomialexperimenter import BinomialExperiment
 from typing import Optional
 
 """ A scientist who runs experiments on a binomial distribution, and who stops 

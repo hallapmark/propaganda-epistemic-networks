@@ -1,5 +1,5 @@
 from agents.abstractagents.bayesianagent import BayesianAgent
-from experimenters.binomialexperimenter import BinomialExperimenter
+from agents.experimenters.binomialexperimenter import BinomialExperimenter
 from typing import List
 
 # TODO: Following Zollman (2007) and Weatherall, O'Connor and Bruner (2020), this
