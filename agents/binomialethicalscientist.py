@@ -7,12 +7,12 @@ from typing import Optional
 """ A scientist who runs experiments on a binomial distribution, and who stops 
 experimenting when credence is below a certain threshold."""
 class BinomialEthicalScientist(BayesianBinomialUpdater, CredenceBasedSupervisor): 
-    def __init__(self, n_per_round: int, epsilon: float, stop_threshold: float, prior: float):
-        print(f"Init BinomialEthicalScientist. Credence: {prior}")
+    def __init__(self, n_per_round: int, epsilon: float, stop_threshold: float, prior: float, rng: np.random.Generator):
         super().__init__(epsilon = epsilon,
                          stop_threshold = stop_threshold,
                          prior = prior)
         self.n_per_round = n_per_round
+        self.rng = rng
         self.binomial_experiment: Optional[BinomialExperiment] = None
     
     # CredenceBasedSupervisor mandatory method implementations
@@ -33,6 +33,6 @@ class BinomialEthicalScientist(BayesianBinomialUpdater, CredenceBasedSupervisor)
         
     # Experiment
     def _experiment(self, n: int, epsilon):
-        k = np.random.binomial(n, 0.5 + epsilon)
+        k = self.rng.binomial(n, 0.5 + epsilon)
         self.binomial_experiment = BinomialExperiment(k, n)
     
