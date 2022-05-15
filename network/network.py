@@ -5,7 +5,6 @@ from typing import List
 
 class ENetworkType(Enum):
    COMPLETE = auto()
-   WHEEL = auto()
    CYCLE = auto()
 
 class ENetworkForBinomialUpdating():
@@ -14,15 +13,16 @@ class ENetworkForBinomialUpdating():
                  scientist_network_type: ENetworkType,
                  n_per_round: int,
                  epsilon: float,
-                 stop_threshold: float,
+                 scientist_stop_threshold: float,
                  rng: np.random.Generator):
         self.scientist_popcount = scientist_popcount
         self.scientist_network_type = scientist_network_type
         self.scientists = [BinomialEthicalScientist(
             n_per_round,
             epsilon,
-            stop_threshold,
-            rng.uniform()
+            scientist_stop_threshold,
+            rng.uniform(),
+            rng
             ) for _ in range(scientist_popcount)]
         # Uniform function is half-open: includes low, excludes high. 
         # TODO: Wouldn't it be a good idea to exclude 0 as well? But practically, for the current
@@ -45,13 +45,12 @@ class ENetworkForBinomialUpdating():
             case ENetworkType.COMPLETE:
                 for updater in bayes_updaters:
                     self._add_all_bayes_influencers_for_updater(updater, bayes_updaters)
-            case ENetworkType.WHEEL:
-                print("We are wheeling it.")  # Not implemented for now
             case ENetworkType.CYCLE:
                 for i, updater in enumerate(bayes_updaters):
                     self._add_cycle_bayes_influencers_for_updater(updater, i, bayes_updaters)
             case _:
                 print("Invalid. All ENetworkType need to be specifically matched.")
+                raise NotImplementedError
 
     def _add_all_bayes_influencers_for_updater(self,
                                           updater: BinomialEthicalScientist,
