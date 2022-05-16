@@ -161,3 +161,4 @@ cython_debug/
 
 # Epistemic networks – simulations
 results
+*.csv
