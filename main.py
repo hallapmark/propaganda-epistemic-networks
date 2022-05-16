@@ -1,6 +1,6 @@
 import numpy as np
 import timeit
-from multiprocessing import Pool
+from multiprocessing import Pool, freeze_support
 from network.network import ENetworkForBinomialUpdating, ENetworkType
 from sim import *
 from typing import Dict, Optional, List
@@ -48,7 +48,7 @@ def run_sim(scientist_pop_count: int,
 
 # A partial reproduction of the results of https://philpapers.org/rec/ZOLTCS
 # We'll use this to verify our model before moving on to more complex networks.
-def zollman_2007(params: ENParams, rng_streams: List[np.random.Generator]) -> ENResultsSummary:
+def sim_setup(params: ENParams, rng_streams: List[np.random.Generator]) -> ENResultsSummary:
     if not rng_streams:
         raise ValueError("There needs to be at least one rng.")
     pool = Pool()
@@ -85,6 +85,9 @@ def consensus_count(results: List[ENSimulationResults]) -> int:
 # ['graph', 'agents', 'epochs', 'conclusion', 'trials', 'epsilon', 'mistrust']
 def record_sim(params: List[str], sim_time: str, results: List[str], path: str, headers: List[str]):
     file_exists = os.path.isfile(path)
+    # res_dir = "/results"
+    # Path(res_dir).mkdir(parents=True, exist_ok=True)
+    # filename = Path(res_dir, filename).with_suffix('.csv')
     with open(path, newline='', mode = 'a') as csv_file:
         writer = csv.writer(csv_file)
         if not file_exists:
@@ -94,6 +97,9 @@ def record_sim(params: List[str], sim_time: str, results: List[str], path: str, 
         for sim_result in results:
             output_list.append(sim_result)
         writer.writerows([output_list])
+
+def zollman2007():
+    """"""
 
 def main():
     sim_count = 10000 # This is standardly 10000 in the Zollman (2007) literature
@@ -106,29 +112,31 @@ def main():
     rng_streams = [np.random.default_rng(s) for s in child_seeds]
     start_time = timeit.default_timer()
     # Zollman configs for a completely connected network
-    # zollman2007_configs_compl = [(pop, ENetworkType.COMPLETE, 1000, 0.001, 0.5, 10000, 0.99) for pop in range(3, 12)]
-    zollman2007_configs_cycle = [(pop, ENetworkType.CYCLE, 1000, 0.001, 0.5, 10000, 0.99) for pop in range(3, 12)]
-    for param_config in zollman2007_configs_cycle:
+    zollman2007_configs_compl = [(pop, ENetworkType.COMPLETE, 1000, 0.001, 0.5, 10000, 0.99) for pop in range(3, 5)]
+    #zollman2007_configs_cycle = [(pop, ENetworkType.CYCLE, 1000, 0.001, 0.5, 10000, 0.99) for pop in range(3, 12)]
+    for param_config in zollman2007_configs_compl:
         print(f'Running config: {param_config}')
         print('...')
         params = ENParams(*param_config)
-        zollman_results = zollman_2007(params, rng_streams)
+        zollman_results = sim_setup(params, rng_streams)
         time_elapsed = timeit.default_timer() - start_time
         print(f'Time elapsed: {time_elapsed}s')
-        headers = [param_name for param_name in params._asdict().keys()]
+        headers = ['Sim count']
+        headers.extend([param_name for param_name in params._asdict().keys()])
         headers.append(f'sim time (s)')
         summary_fields = [field for field in zollman_results.sims_summary._asdict().keys()]
         headers.extend(summary_fields)
-        param_str_list = [str(param) for param in param_config]
+        param_str_list = [str(sim_count)]
+        param_str_list.extend([str(param) for param in param_config])
         result_str_list = [zollman_results.sims_summary.proportion_consensus_reached,
                     zollman_results.sims_summary.avg_consensus_round]
         #path = os.path.join(os.getcwd(), 'zollman2007.csv')
         print(f'Summary fields: {summary_fields}')
         print(f'Results from config: {result_str_list}')
         print()
-        record_sim(param_str_list, str(time_elapsed), result_str_list, "zollman2007.csv", headers)
+        record_sim(param_str_list, str(round(time_elapsed, 2)), result_str_list, "zollman2007.csv", headers)
 
 if __name__ == "__main__":
-    # freeze_support() # Only needed if we're making an executable that packs Python with it
+    freeze_support() 
     # https://docs.python-guide.org/shipping/freezing/
     main()
