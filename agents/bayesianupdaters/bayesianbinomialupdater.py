@@ -30,7 +30,7 @@ class BayesianBinomialUpdater(BayesianAgent):
     def _bayes_update_credence_on_influencer(self, influencer: BinomialExperimenter): 
         data = influencer.get_experiment_data()
         if data:
-            p = 0.5 + self.epsilon
+            p = 0.5 + self.epsilon # hypothesis
             self.credence = self._bayes_calculate_posterior_two_possible_worlds(self.credence, data.k, data.n, p)
             
     def _bayes_calculate_posterior_two_possible_worlds(self, prior: float, k: int, n: int, p: float) -> float:
