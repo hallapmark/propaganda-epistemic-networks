@@ -21,14 +21,14 @@ class EpistemicNetworkSimulation():
         self.results: Optional[ENSimulationResults] = None
     
     def run_sim(self):
-        for i in range(self._maxrounds):
+        for i in range(1, self._maxrounds + 1):
             if self.results:
                 break
-            self.sim_action(i)
+            self._sim_action(i)
         if not self.results:
             self.results = ENSimulationResults(None, None, self._sim_round)
 
-    def sim_action(self, sim_round: int):
+    def _sim_action(self, sim_round: int):
         if self.results:
             return
         self._sim_round = sim_round
