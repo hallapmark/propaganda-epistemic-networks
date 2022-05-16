@@ -90,13 +90,13 @@ def record_sim(params: List[str], sim_time: str, results: List[str], path: str, 
         if not file_exists:
             writer.writerow(headers)
         output_list = params
+        output_list.append(sim_time)
         for sim_result in results:
-            output_list.append(sim_time)
             output_list.append(sim_result)
         writer.writerows([output_list])
 
 def main():
-    sim_count = 100 # TODO: This is standardly 10000
+    sim_count = 10000 # This is standardly 10000 in the Zollman (2007) literature
     #params = [(10, ENetworkType.COMPLETE, 1000, 0.001, 0.5, rng, 10000, 0.99) for _ in range(sim_count)]
     
     # Careful when passing rng instances to starmap. If you do not set independent seeds, you will get 
@@ -105,23 +105,27 @@ def main():
     child_seeds = np.random.SeedSequence(25359).spawn(sim_count)
     rng_streams = [np.random.default_rng(s) for s in child_seeds]
     start_time = timeit.default_timer()
-    zollman2007_configs = [(pop, ENetworkType.COMPLETE, 1000, 0.001, 0.5, 10000, 0.99) for pop in range(3, 4)]
-    for param_config in zollman2007_configs:
+    # Zollman configs for a completely connected network
+    # zollman2007_configs_compl = [(pop, ENetworkType.COMPLETE, 1000, 0.001, 0.5, 10000, 0.99) for pop in range(3, 12)]
+    zollman2007_configs_cycle = [(pop, ENetworkType.CYCLE, 1000, 0.001, 0.5, 10000, 0.99) for pop in range(3, 12)]
+    for param_config in zollman2007_configs_cycle:
+        print(f'Running config: {param_config}')
+        print('...')
         params = ENParams(*param_config)
         zollman_results = zollman_2007(params, rng_streams)
         time_elapsed = timeit.default_timer() - start_time
         print(f'Time elapsed: {time_elapsed}s')
         headers = [param_name for param_name in params._asdict().keys()]
         headers.append(f'sim time (s)')
-        for summary_field in zollman_results.sims_summary._asdict().keys():
-            headers.append(summary_field)
-        print(headers)
+        summary_fields = [field for field in zollman_results.sims_summary._asdict().keys()]
+        headers.extend(summary_fields)
         param_str_list = [str(param) for param in param_config]
         result_str_list = [zollman_results.sims_summary.proportion_consensus_reached,
                     zollman_results.sims_summary.avg_consensus_round]
         #path = os.path.join(os.getcwd(), 'zollman2007.csv')
-        print(param_str_list)
-        print(result_str_list)
+        print(f'Summary fields: {summary_fields}')
+        print(f'Results from config: {result_str_list}')
+        print()
         record_sim(param_str_list, str(time_elapsed), result_str_list, "zollman2007.csv", headers)
 
 if __name__ == "__main__":
