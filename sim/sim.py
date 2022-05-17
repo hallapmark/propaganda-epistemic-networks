@@ -22,7 +22,7 @@ class EpistemicNetworkSimulation():
                 break
             self._sim_action(i)
         if not self.results:
-            self.results = ENSimulationRawResults(None, None, self._sim_round)
+            self.results = ENSimulationRawResults(None, None, self._sim_round, None)
 
     def _sim_action(self, sim_round: int):
         if self.results:
@@ -31,10 +31,16 @@ class EpistemicNetworkSimulation():
         credences = np.array([a.credence for a in self.epistemic_network.scientists])
         if all(credences < self._low_stop):
             # Everyone's credence in B is below 0.5. Abandon further research
-            self.results = ENSimulationRawResults(None, sim_round, sim_round)
+            self.results = ENSimulationRawResults(None, sim_round, sim_round, None)
             return
         if all(credences > .99):
             # Everyone's credence in B is above .99. Scientific consensus reached
-            self.results = ENSimulationRawResults(sim_round, None, sim_round)
+            p_avg_cr = self.epistemic_network.passive_updaters_avg_credence()
+            self.results = ENSimulationRawResults(sim_round,
+                                                  None,
+                                                  sim_round,
+                                                  p_avg_cr)
+            # get average credence that policymakers have when scientists reach consensus 
+
             return
         self.epistemic_network.enetwork_play_round()

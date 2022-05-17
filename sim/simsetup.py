@@ -13,19 +13,12 @@ import csv
 class ENSimType(Enum):
     ZOLLMAN_COMPLETE = auto()
     ZOLLMAN_CYCLE = auto()
-    PROPAGANDA = auto()
-    COUNTER_PROPAGANDA = auto()
-
-class ENPassiveUpdatersConfig(NamedTuple):
-    count: int
-    min_prior: float
-    max_prior: float
-
-# [(config1), (config2) ...]
-Param_List = list[tuple[int, ENetworkType, int, float, float, int, float, ENPassiveUpdatersConfig]]
-
-
-
+    POLICYMAKERS_COMPLETE = auto()
+    POLICYMAKERS_CYCLE = auto()
+    PROPAGANDA_COMPLETE = auto()
+    PROPAGANDA_CYCLE = auto()
+    COUNTER_PROPAGANDA_COMPLETE = auto()
+    COUNTER_PROPAGANDA_CYCLE = auto()
 
 class ENSimSetup():
     def __init__(self,
@@ -42,17 +35,29 @@ class ENSimSetup():
         match self.sim_type:
             # A partial reproduction of the results of Zollman https://philpapers.org/rec/ZOLTCS
             case ENSimType.ZOLLMAN_COMPLETE:
-                configs = [(pop, ENetworkType.COMPLETE, 1000, 0.001, 0.5, 10000, 0.99, ENPassiveUpdatersConfig(0, 0, 0)) for pop in range(5, 6)]
+                configs = [ENParams(pop, ENetworkType.COMPLETE, 1000, 0.001, 0.5, 10000, 0.99, None) for pop in range(3, 5)]
                 self.setup_sims(configs, "zollman2007.csv")
             case ENSimType.ZOLLMAN_CYCLE:
-                configs = [(pop, ENetworkType.CYCLE, 1000, 0.001, 0.5, 10000, 0.99, ENPassiveUpdatersConfig(0, 0, 0)) for pop in range(2, 3)]
+                configs = [ENParams(pop, ENetworkType.CYCLE, 1000, 0.001, 0.5, 10000, 0.99, None) for pop in range(4, 5)]
                 self.setup_sims(configs, "zollman2007.csv")
-            case ENSimType.PROPAGANDA:
-                configs = [(pop, ENetworkType.COMPLETE, 1000, 0.001, 0.5, 10000, 0.99, ENPassiveUpdatersConfig(2, 0, 0.5)) for pop in range(5, 6)]
-            case ENSimType.COUNTER_PROPAGANDA:
+            case ENSimType.POLICYMAKERS_COMPLETE: # Weatherall et al. 2020 (without propagandists)   pop = 4; 6; 10; 20; 50 – but we are skipping 50 for sure
+                configs = [ENParams(pop, ENetworkType.COMPLETE, 1000, 0.001, 0.5, 10000, 0.99, ENPassiveUpdatersConfig(2, 0, 0.5, infl_count)) for pop in (4, 6)
+                                                                                                                                               for infl_count in range(1, pop+1)]
+                self.setup_sims(configs, "policymakers_complete.csv")
+            case ENSimType.POLICYMAKERS_CYCLE: # Figure 2 first part
+                configs = [ENParams(pop, ENetworkType.CYCLE, 10, 0.05, 0.5, 10000, 0.99, ENPassiveUpdatersConfig(2, 0, 0.5, infl_count))    for pop in (20,) 
+                                                                                                                                            for infl_count in range(1, pop+1)]
+                self.setup_sims(configs, "policymakers_cycle.csv")                                          
+            case ENSimType.PROPAGANDA_COMPLETE:
+                raise NotImplementedError
+            case ENSimType.PROPAGANDA_CYCLE:
+                raise NotImplementedError
+            case ENSimType.COUNTER_PROPAGANDA_COMPLETE:
+                raise NotImplementedError
+            case ENSimType.COUNTER_PROPAGANDA_CYCLE:
                 raise NotImplementedError
 
-    def setup_sims(self, configs: Param_List, output_filename: str):
+    def setup_sims(self, configs: List[ENParams], output_filename: str):
         # We need to be careful when passing rng instances to starmap. If we do not set independent seeds, 
         # we will get the *same* results each simulation since the subprocesses share the parent's initial 
         # rng state.
@@ -60,12 +65,10 @@ class ENSimSetup():
         child_seeds = np.random.SeedSequence(25359).spawn(self.sim_count)
         rng_streams = [np.random.default_rng(s) for s in child_seeds]
         for param_config in configs:
-            start_time = timeit.default_timer()
             print(f'Running config: {param_config}')
             print('...')
-            params = ENParams(*param_config)
-            print(params)
-            results_summary = self.run_sims_for_param_config(params, rng_streams)
+            start_time = timeit.default_timer()
+            results_summary = self.run_sims_for_param_config(param_config, rng_streams)
             time_elapsed = timeit.default_timer() - start_time
             print(f'Time elapsed: {time_elapsed}s')
             csv_data = self.data_for_writing(results_summary, self.sim_count, time_elapsed)
@@ -91,7 +94,11 @@ class ENSimSetup():
             avg_consensus_round = round(float(avg_c_r), 3)
         else:
             avg_consensus_round = "N/A"
-        sims_summary = ENResultsSummary(str(proportion_consensus_reached), str(avg_consensus_round))
+        passive_upd_averages = [res.passive_updaters_avg_credence for res in results if res.passive_updaters_avg_credence]
+        passive_cr = "N/A"
+        if passive_upd_averages:
+            passive_cr = np.mean(passive_upd_averages)
+        sims_summary = ENResultsSummary(str(proportion_consensus_reached), str(avg_consensus_round), str(passive_cr))
         return ENSimsSummary(params, sims_summary)
 
     def run_sim(self,
@@ -103,17 +110,14 @@ class ENSimSetup():
                 scientist_stop_threshold: float,
                 max_research_rounds: int,
                 consensus_threshold: float,
-                passive_updaters_count: int) -> Optional[ENSimulationRawResults]:
-        network = ENetworkForBinomialUpdating(scientist_pop_count,
+                passive_updaters_config: Optional[ENPassiveUpdatersConfig]) -> Optional[ENSimulationRawResults]:
+        network = ENetworkForBinomialUpdating(rng,
+                                              scientist_pop_count,
                                               network_type,
                                               n_per_round,
                                               epsilon,
                                               scientist_stop_threshold,
-                                              rng)
-        passive_updaters = 
-        for i in range(passive_updaters_count):
-            updater = BayesianBinomialUpdater(epsilon = epsilon, 
-                                             prior = rng.uniform(0, 0.5))
+                                              passive_updaters_config)
         simulation = EpistemicNetworkSimulation(network, 
                                                 max_research_rounds, 
                                                 scientist_stop_threshold, 
