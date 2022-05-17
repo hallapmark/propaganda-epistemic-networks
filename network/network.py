@@ -1,13 +1,8 @@
 from agents.binomialethicalscientist import BinomialEthicalScientist
 from agents.bayesianupdaters.bayesianbinomialupdater import BayesianBinomialUpdater
-from sim.sim_models import ENPassiveUpdatersConfig
+from sim.sim_models import *
 import numpy as np
-from enum import Enum, auto
 from typing import List, Optional
-
-class ENetworkType(Enum):
-   COMPLETE = auto()
-   CYCLE = auto()
 
 class ENetworkForBinomialUpdating():
     def __init__(self,

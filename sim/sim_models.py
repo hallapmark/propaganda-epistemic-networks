@@ -1,6 +1,9 @@
-from typing import Optional, NamedTuple, List
-from network.network import ENetworkType
+from typing import Optional, NamedTuple,  List
+from enum import Enum, auto
 
+class ENetworkType(Enum):
+   COMPLETE = auto()
+   CYCLE = auto()
 class ENPassiveUpdatersConfig(NamedTuple):
     updater_count: int
     min_prior: float
@@ -21,10 +24,12 @@ class ENSimulationRawResults(NamedTuple):
     consensus_round: Optional[int]
     research_abandoned_round: Optional[int]
     final_sim_round: int
+    passive_updaters_avg_credence: Optional[float]
 
 class ENResultsSummary(NamedTuple):
-    proportion_consensus_reached: str
+    scientist_proportion_consensus_reached: str
     scientists_avg_consensus_round: str
+    passive_updaters_avg_credence: str
 
 class ENSimsSummary(NamedTuple):
     params: ENParams

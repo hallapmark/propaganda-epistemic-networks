@@ -35,17 +35,19 @@ class ENSimSetup():
         match self.sim_type:
             # A partial reproduction of the results of Zollman https://philpapers.org/rec/ZOLTCS
             case ENSimType.ZOLLMAN_COMPLETE:
-                configs = [ENParams(pop, ENetworkType.COMPLETE, 1000, 0.001, 0.5, 10000, 0.99, None) for pop in range(3, 4)]
+                configs = [ENParams(pop, ENetworkType.COMPLETE, 1000, 0.001, 0.5, 10000, 0.99, None) for pop in range(3, 5)]
                 self.setup_sims(configs, "zollman2007.csv")
             case ENSimType.ZOLLMAN_CYCLE:
                 configs = [ENParams(pop, ENetworkType.CYCLE, 1000, 0.001, 0.5, 10000, 0.99, None) for pop in range(4, 5)]
                 self.setup_sims(configs, "zollman2007.csv")
             case ENSimType.POLICYMAKERS_COMPLETE: # Weatherall et al. 2020 (without propagandists)   pop = 4; 6; 10; 20; 50 – but we are skipping 50 for sure
                 configs = [ENParams(pop, ENetworkType.COMPLETE, 1000, 0.001, 0.5, 10000, 0.99, ENPassiveUpdatersConfig(2, 0, 0.5, infl_count)) for pop in (4, 6)
-                                                                                                                                               for infl_count in range(pop)]
-                self.setup_sims(configs, "policymakers.csv")
-            case ENSimType.POLICYMAKERS_CYCLE:
-                raise NotImplementedError
+                                                                                                                                               for infl_count in range(1, pop+1)]
+                self.setup_sims(configs, "policymakers_complete.csv")
+            case ENSimType.POLICYMAKERS_CYCLE: # Figure 2 first part
+                configs = [ENParams(pop, ENetworkType.CYCLE, 10, 0.05, 0.5, 10000, 0.99, ENPassiveUpdatersConfig(2, 0, 0.5, infl_count))    for pop in (20,) 
+                                                                                                                                            for infl_count in range(1, pop+1)]
+                self.setup_sims(configs, "policymakers_cycle.csv")                                          
             case ENSimType.PROPAGANDA_COMPLETE:
                 raise NotImplementedError
             case ENSimType.PROPAGANDA_CYCLE:
@@ -92,7 +94,11 @@ class ENSimSetup():
             avg_consensus_round = round(float(avg_c_r), 3)
         else:
             avg_consensus_round = "N/A"
-        sims_summary = ENResultsSummary(str(proportion_consensus_reached), str(avg_consensus_round))
+        passive_upd_averages = [res.passive_updaters_avg_credence for res in results if res.passive_updaters_avg_credence]
+        passive_cr = "N/A"
+        if passive_upd_averages:
+            passive_cr = np.mean(passive_upd_averages)
+        sims_summary = ENResultsSummary(str(proportion_consensus_reached), str(avg_consensus_round), str(passive_cr))
         return ENSimsSummary(params, sims_summary)
 
     def run_sim(self,
