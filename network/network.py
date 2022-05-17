@@ -66,6 +66,15 @@ class ENetworkForBinomialUpdating():
     def enetwork_play_round(self):
         for scientist in self.scientists:
             scientist.decide_round_research_action()
+        if self.passive_updaters:
+            for passive_updater in self.passive_updaters:
+                passive_updater.bayes_update_credence()
+
+    def passive_updaters_avg_credence(self) -> Optional[float]:
+        if not self.passive_updaters:
+            return None
+        avg_credence = np.mean([a.credence for a in self.passive_updaters])
+        return round(float(avg_credence), 3)
 
     ## Private methods
     # TODO: The influencer logic can probably be made more generic

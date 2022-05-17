@@ -36,5 +36,7 @@ class EpistemicNetworkSimulation():
         if all(credences > .99):
             # Everyone's credence in B is above .99. Scientific consensus reached
             self.results = ENSimulationRawResults(sim_round, None, sim_round)
+            # get average credence that policymakers have when scientists reach consensus 
+            
             return
         self.epistemic_network.enetwork_play_round()
