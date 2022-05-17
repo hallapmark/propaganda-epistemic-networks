@@ -13,19 +13,12 @@ import csv
 class ENSimType(Enum):
     ZOLLMAN_COMPLETE = auto()
     ZOLLMAN_CYCLE = auto()
+    POLICYMAKERS = auto()
     PROPAGANDA = auto()
     COUNTER_PROPAGANDA = auto()
 
-class ENPassiveUpdatersConfig(NamedTuple):
-    count: int
-    min_prior: float
-    max_prior: float
-
 # [(config1), (config2) ...]
 Param_List = list[tuple[int, ENetworkType, int, float, float, int, float, ENPassiveUpdatersConfig]]
-
-
-
 
 class ENSimSetup():
     def __init__(self,
@@ -47,8 +40,11 @@ class ENSimSetup():
             case ENSimType.ZOLLMAN_CYCLE:
                 configs = [(pop, ENetworkType.CYCLE, 1000, 0.001, 0.5, 10000, 0.99, ENPassiveUpdatersConfig(0, 0, 0)) for pop in range(2, 3)]
                 self.setup_sims(configs, "zollman2007.csv")
+            case ENSimType.POLICYMAKERS: # Weatherall et al. 2020 line without propagandists  
+                configs = [(pop, ENetworkType.COMPLETE, 1000, 0.001, 0.5, 10000, 0.99, ENPassiveUpdatersConfig(2, 0, 0.5)) for pop in (4, 6)]
+                self.setup_sims(configs, "policymakers.csv")
             case ENSimType.PROPAGANDA:
-                configs = [(pop, ENetworkType.COMPLETE, 1000, 0.001, 0.5, 10000, 0.99, ENPassiveUpdatersConfig(2, 0, 0.5)) for pop in range(5, 6)]
+                raise NotImplementedError
             case ENSimType.COUNTER_PROPAGANDA:
                 raise NotImplementedError
 
@@ -103,17 +99,19 @@ class ENSimSetup():
                 scientist_stop_threshold: float,
                 max_research_rounds: int,
                 consensus_threshold: float,
-                passive_updaters_count: int) -> Optional[ENSimulationRawResults]:
+                passive_updaters_config: ENPassiveUpdatersConfig) -> Optional[ENSimulationRawResults]:
         network = ENetworkForBinomialUpdating(scientist_pop_count,
                                               network_type,
                                               n_per_round,
                                               epsilon,
                                               scientist_stop_threshold,
                                               rng)
-        passive_updaters = 
-        for i in range(passive_updaters_count):
-            updater = BayesianBinomialUpdater(epsilon = epsilon, 
-                                             prior = rng.uniform(0, 0.5))
+        passive_updaters: List[BayesianBinomialUpdater] = []
+        for _ in range(passive_updaters_config.count):
+            updater = BayesianBinomialUpdater(epsilon=epsilon,
+                                              prior=rng.uniform(passive_updaters_config.min_prior,
+                                                                passive_updaters_config.max_prior))
+            passive_updaters.append(updater)
         simulation = EpistemicNetworkSimulation(network, 
                                                 max_research_rounds, 
                                                 scientist_stop_threshold, 

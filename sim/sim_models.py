@@ -1,6 +1,11 @@
 from typing import Optional, NamedTuple, List
 from network.network import ENetworkType
 
+class ENPassiveUpdatersConfig(NamedTuple):
+    count: int
+    min_prior: float
+    max_prior: float
+
 class ENParams(NamedTuple):
     scientist_pop_count: int 
     network_type: ENetworkType
@@ -9,7 +14,7 @@ class ENParams(NamedTuple):
     scientist_stop_threshold: float
     max_research_rounds_allowed: int
     consensus_threshold: float
-    passive_updaters_count: int # E.g. policymakers
+    passive_updaters_config: ENPassiveUpdatersConfig # E.g. policymakers
 
 class ENSimulationRawResults(NamedTuple):
     consensus_round: Optional[int]
