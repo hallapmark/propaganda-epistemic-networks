@@ -35,23 +35,25 @@ class ENSimSetup():
         match self.sim_type:
             # A partial reproduction of the results of Zollman https://philpapers.org/rec/ZOLTCS
             case ENSimType.ZOLLMAN_COMPLETE:
-                configs = [ENParams(pop, ENetworkType.COMPLETE, 1000, 0.001, 0.5, 10000, 0.99, None) for pop in range(3, 5)]
+                configs = [ENParams(pop, ENetworkType.COMPLETE, 1000, 0.001, 0.5, 10000, 0.99, None, False) for pop in range(3, 5)]
                 self.setup_sims(configs, "zollman2007.csv")
             case ENSimType.ZOLLMAN_CYCLE:
-                configs = [ENParams(pop, ENetworkType.CYCLE, 1000, 0.001, 0.5, 10000, 0.99, None) for pop in range(4, 5)]
+                configs = [ENParams(pop, ENetworkType.CYCLE, 1000, 0.001, 0.5, 10000, 0.99, None, False) for pop in range(4, 5)]
                 self.setup_sims(configs, "zollman2007.csv")
             case ENSimType.POLICYMAKERS_COMPLETE: # Weatherall et al. 2020 (without propagandists)   pop = 4; 6; 10; 20; 50 – but we are skipping 50 for sure
-                configs = [ENParams(pop, ENetworkType.COMPLETE, 1000, 0.001, 0.5, 10000, 0.99, ENPassiveUpdatersConfig(2, 0, 0.5, infl_count)) for pop in (4, 6)
+                configs = [ENParams(pop, ENetworkType.COMPLETE, 1000, 0.001, 0.5, 10000, 0.99, ENPassiveUpdatersConfig(2, 0, 0.5, infl_count), False) for pop in (4, 6)
                                                                                                                                                for infl_count in range(1, pop+1)]
                 self.setup_sims(configs, "policymakers_complete.csv")
             case ENSimType.POLICYMAKERS_CYCLE: # Figure 2 first part
-                configs = [ENParams(pop, ENetworkType.CYCLE, 10, 0.05, 0.5, 10000, 0.99, ENPassiveUpdatersConfig(2, 0, 0.5, infl_count))    for pop in (20,) 
+                configs = [ENParams(pop, ENetworkType.CYCLE, 10, 0.05, 0.5, 10000, 0.99, ENPassiveUpdatersConfig(2, 0, 0.5, infl_count), False)    for pop in (20,) 
                                                                                                                                             for infl_count in range(1, pop+1)]
                 self.setup_sims(configs, "policymakers_cycle.csv")                                          
             case ENSimType.PROPAGANDA_COMPLETE:
                 raise NotImplementedError
             case ENSimType.PROPAGANDA_CYCLE:
-                raise NotImplementedError
+                configs = [ENParams(pop, ENetworkType.CYCLE, 10, 0.05, 0.5, 10000, 0.99, ENPassiveUpdatersConfig(2, 0, 0.5, infl_count), True)  for pop in (20,) 
+                                                                                                                                                for infl_count in range(1, pop+1)]
+                self.setup_sims(configs, "policymakers_cycle.csv") 
             case ENSimType.COUNTER_PROPAGANDA_COMPLETE:
                 raise NotImplementedError
             case ENSimType.COUNTER_PROPAGANDA_CYCLE:
@@ -110,14 +112,16 @@ class ENSimSetup():
                 scientist_stop_threshold: float,
                 max_research_rounds: int,
                 consensus_threshold: float,
-                passive_updaters_config: Optional[ENPassiveUpdatersConfig]) -> Optional[ENSimulationRawResults]:
+                passive_updaters_config: Optional[ENPassiveUpdatersConfig],
+                propagandist_active: bool) -> Optional[ENSimulationRawResults]:
         network = ENetworkForBinomialUpdating(rng,
                                               scientist_pop_count,
                                               network_type,
                                               n_per_round,
                                               epsilon,
                                               scientist_stop_threshold,
-                                              passive_updaters_config)
+                                              passive_updaters_config,
+                                              propagandist_active)
         simulation = EpistemicNetworkSimulation(network, 
                                                 max_research_rounds, 
                                                 scientist_stop_threshold, 

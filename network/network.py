@@ -14,7 +14,7 @@ class ENetworkForBinomialUpdating():
                  epsilon: float,
                  scientist_stop_threshold: float,
                  passive_updaters_config: Optional[ENPassiveUpdatersConfig],
-                 propagandist_active: bool):
+                 selective_sharing_propagandist_active: bool):
         self.scientist_popcount = scientist_popcount
         self.scientist_network_type = scientist_network_type
         self.scientists = [BinomialEthicalScientist(
@@ -26,12 +26,13 @@ class ENetworkForBinomialUpdating():
             # Uniform function is half-open: includes low, excludes high. 
             # TODO: Wouldn't it be a good idea to exclude 0 as well? 
             ) for _ in range(scientist_popcount)]
-        self._structure_scientific_network(self.scientists, scientist_network_ptype)
+        self._structure_scientific_network(self.scientists, scientist_network_type)
         self.passive_updaters: Optional[List[BayesianBinomialUpdater]] = None
         if passive_updaters_config:
             self._passive_udpaters_init(passive_updaters_config, epsilon, rng)
-        self.propagandist: Optional[SelectiveSharingPropagandist] = None
-        self.propagandist = SelectiveSharingPropagandist(self.scientists) if propagandist_active else None
+        self.propagandist = SelectiveSharingPropagandist() if propagandist_active else None
+        if self.propagandist:
+            self._propagandist_init(self.propagandist)
 
     ## Init helpers
     def _structure_scientific_network(self,
@@ -60,6 +61,12 @@ class ENetworkForBinomialUpdating():
             self._add_bayes_influencers_for_passive_updater(updater, 
                                                             passive_updaters_config, 
                                                             self.scientists)
+
+    def _propagandist_init(self, propagandist: SelectiveSharingPropagandist):
+        self._add_scientist_pool_for_propagandist(propagandist)
+        if self.passive_updaters:
+            self._add_propagandist_influencer_for_passive_updaters(propagandist,
+                                                                   self.passive_updaters)
 
     ## Interface
     def enetwork_play_round(self):
@@ -111,3 +118,14 @@ class ENetworkForBinomialUpdating():
             self.passive_updaters.append(updater)
         else:
             self.passive_updaters = [updater]
+
+    def _add_scientist_pool_for_propagandist(self, propagandist: SelectiveSharingPropagandist):
+        for scientist in self.scientists:
+            propagandist.add_scientist(scientist)
+        
+    def _add_propagandist_influencer_for_passive_updaters(self, 
+                                                        propagandist: SelectiveSharingPropagandist, 
+                                                        passive_updaters: List[BayesianBinomialUpdater]):
+        for updater in passive_updaters:
+            updater.add_bayes_influencer(propagandist)
+

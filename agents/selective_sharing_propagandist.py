@@ -3,11 +3,16 @@ from network.network import ENetworkForBinomialUpdating
 from typing import List
 
 class SelectiveSharingPropagandist(BinomialExperimenter):
-    def __init__(self, scientists: List[BinomialExperimenter]):
-        self.scientists = scientists
+    def __init__(self):
+        self.scientists: List[BinomialExperimenter] = []
+
+    def add_scientist(self, scientist: BinomialExperimenter):
+        self.scientists.append(scientist)
 
     # BinomialExperimenter implementation
     def get_experiment_data(self) -> Optional[BinomialExperiment]:
+        if not self.scientists:
+            return None
         experiments = [scientist.get_experiment_data() for scientist in self.scientists]
         experiments = [experiment for experiment in experiments if experiment]
         if experiments:
