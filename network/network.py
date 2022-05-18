@@ -1,5 +1,6 @@
 from agents.binomialethicalscientist import BinomialEthicalScientist
 from agents.bayesianupdaters.bayesianbinomialupdater import BayesianBinomialUpdater
+from agents.selective_sharing_propagandist import SelectiveSharingPropagandist
 from sim.sim_models import *
 import numpy as np
 from typing import List, Optional
@@ -12,7 +13,8 @@ class ENetworkForBinomialUpdating():
                  n_per_round: int,
                  epsilon: float,
                  scientist_stop_threshold: float,
-                 passive_updaters_config: Optional[ENPassiveUpdatersConfig]):
+                 passive_updaters_config: Optional[ENPassiveUpdatersConfig],
+                 propagandist_active: bool):
         self.scientist_popcount = scientist_popcount
         self.scientist_network_type = scientist_network_type
         self.scientists = [BinomialEthicalScientist(
@@ -24,10 +26,12 @@ class ENetworkForBinomialUpdating():
             # Uniform function is half-open: includes low, excludes high. 
             # TODO: Wouldn't it be a good idea to exclude 0 as well? 
             ) for _ in range(scientist_popcount)]
-        self._structure_scientific_network(self.scientists, scientist_network_type)
+        self._structure_scientific_network(self.scientists, scientist_network_ptype)
         self.passive_updaters: Optional[List[BayesianBinomialUpdater]] = None
         if passive_updaters_config:
             self._passive_udpaters_init(passive_updaters_config, epsilon, rng)
+        self.propagandist: Optional[SelectiveSharingPropagandist] = None
+        self.propagandist = SelectiveSharingPropagandist(self.scientists) if propagandist_active else None
 
     ## Init helpers
     def _structure_scientific_network(self,
