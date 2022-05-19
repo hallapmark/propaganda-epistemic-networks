@@ -1,4 +1,5 @@
 # propaganda-epistemic-networks
+WIP. 
 Python code for modelling the effects of propaganda in epistemic networks
 
 This project requires Python 3.10.
