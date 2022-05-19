@@ -127,5 +127,5 @@ class ENetworkForBinomialUpdating():
                                                         propagandist: SelectiveSharingPropagandist, 
                                                         passive_updaters: List[BayesianBinomialUpdater]):
         for updater in passive_updaters:
-            updater.add_bayes_influencer(propagandist)
+            updater.add_selective_propagandist_influencer(propagandist)
 

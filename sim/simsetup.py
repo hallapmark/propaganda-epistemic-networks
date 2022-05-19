@@ -45,14 +45,14 @@ class ENSimSetup():
                                                                                                                                                for infl_count in range(1, pop+1)]
                 self.setup_sims(configs, "policymakers_complete.csv")
             case ENSimType.POLICYMAKERS_CYCLE: # Figure 2 first part
-                configs = [ENParams(pop, ENetworkType.CYCLE, 10, 0.05, 0.5, 10000, 0.99, ENPassiveUpdatersConfig(2, 0, 0.5, infl_count), False)    for pop in (20,) 
-                                                                                                                                            for infl_count in range(1, pop+1)]
+                configs = [ENParams(pop, ENetworkType.CYCLE, 10, 0.05, 0.5, 10000, 0.99, ENPassiveUpdatersConfig(1, 0, 0.5, infl_count), False) for pop in (20,) 
+                                                                                                                                                for infl_count in range(1, pop+1)]
                 self.setup_sims(configs, "policymakers_cycle.csv")                                          
             case ENSimType.PROPAGANDA_COMPLETE:
                 raise NotImplementedError
             case ENSimType.PROPAGANDA_CYCLE:
-                configs = [ENParams(pop, ENetworkType.CYCLE, 10, 0.05, 0.5, 10000, 0.99, ENPassiveUpdatersConfig(2, 0, 0.5, infl_count), True)  for pop in (20,) 
-                                                                                                                                                for infl_count in range(1, 12)]
+                configs = [ENParams(pop, ENetworkType.CYCLE, 10, 0.05, 0.5, 10000, 0.99, ENPassiveUpdatersConfig(1, 0, 0.5, infl_count), True)  for pop in (20,) 
+                                                                                                                                                for infl_count in range(1, pop+1)]
                 self.setup_sims(configs, "policymakers_cycle.csv") 
             case ENSimType.COUNTER_PROPAGANDA_COMPLETE:
                 raise NotImplementedError

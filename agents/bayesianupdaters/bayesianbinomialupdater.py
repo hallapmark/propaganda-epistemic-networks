@@ -1,6 +1,6 @@
 from agents.abstractagents.bayesianagent import BayesianAgent
 from agents.experimenters.binomialexperimenter import BinomialExperimenter
-from typing import List
+from agents.selective_sharing_propagandist import SelectiveSharingPropagandist
 
 # TODO: Following Zollman (2007) and Weatherall, O'Connor and Bruner (2020), this
 # implementation currently assumes that there are only two competing hypotheses/possible worlds:
@@ -13,26 +13,42 @@ class BayesianBinomialUpdater(BayesianAgent):
         super().__init__(**kw)
         self.epsilon = epsilon
         # Influencers can include self
-        self.bayes_influencers: List[BinomialExperimenter] = []
+        self.bayes_influencers: list[BinomialExperimenter] = []
         # In the future, we can also add jeffrey influencers whose data the updater
         # does not fully trust.
+        self.selective_propagandist_influencers: list[SelectiveSharingPropagandist] = []
         
     def add_bayes_influencer(self, influencer: BinomialExperimenter):
         self.bayes_influencers.append(influencer)
+    
+    def add_selective_propagandist_influencer(self,
+                                              influencer: SelectiveSharingPropagandist):
+        self.selective_propagandist_influencers.append(influencer)
+
 
     # Public interface
     # Superclass mandatory method implementation
     def bayes_update_credence(self):
         for influencer in self.bayes_influencers:
             self._bayes_update_credence_on_influencer(influencer)
+        for propagandist in self.selective_propagandist_influencers:
+            self._bayes_update_credence_on_propagandist(propagandist)
         
     # Private methods
     def _bayes_update_credence_on_influencer(self, influencer: BinomialExperimenter): 
-        data = influencer.get_experiment_data()
-        if data:
+        exp = influencer.get_experiment_data()
+        if exp:
             p = 0.5 + self.epsilon # hypothesis
-            self.credence = self._bayes_calculate_posterior_two_possible_worlds(self.credence, data.k, data.n, p)
-            
+            self.credence = self._bayes_calculate_posterior_two_possible_worlds(self.credence, exp.k, exp.n, p)
+    
+    def _bayes_update_credence_on_propagandist(self, propagandist: SelectiveSharingPropagandist):
+        experiment_list = propagandist.get_experiment_data()
+        if not experiment_list:
+            return
+        for exp in experiment_list:
+            p = 0.5 + self.epsilon
+            self.credence = self._bayes_calculate_posterior_two_possible_worlds(self.credence, exp.k, exp.n, p)
+
     def _bayes_calculate_posterior_two_possible_worlds(self, prior: float, k: int, n: int, p: float) -> float:
         """ Truncated Bayes' formula for the binomial distribution. It is assumed that there 
         are only two possible parameter values (two possible worlds): p and 1-p. This parameter gives
