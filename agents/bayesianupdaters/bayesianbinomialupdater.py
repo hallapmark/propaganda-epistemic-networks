@@ -55,9 +55,13 @@ class BayesianBinomialUpdater(BayesianAgent):
         the probability of a "success" event occurring on a given try. """
         # This formula looks bonkers but it is derived from the full Bayes' formula (as applied to binomials).
         # This speeds up the simulations.
-        return 1 / (1 + ((1 - prior) * ((1 - p) / p) ** (2 * k - n)) / prior)
+        if prior > 0:
+            return 1 / (1 + ((1 - prior) * ((1 - p) / p) ** (2 * k - n)) / prior)
+        else:
+            return 0
 
-    # P(E|H)
+
+    # # P(E|H)
     # def _calculate_likelihood(self, k, n, p, factorial_func) -> float:
     #     """ Use the full likelihood formula if you are either ignoring the denominator
     #     in Bayes' theorem or if you need to calculate P(E|H) independently for some

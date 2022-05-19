@@ -23,7 +23,7 @@ class ENetworkForBinomialUpdating():
             n_per_round,
             epsilon,
             scientist_stop_threshold,
-            rng.uniform()
+            rng.uniform(0.001)
             # Uniform function is half-open: includes low, excludes high. 
             # TODO: Wouldn't it be a good idea to exclude 0 as well? 
             ) for _ in range(scientist_popcount)]
