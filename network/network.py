@@ -80,9 +80,8 @@ class ENetworkForBinomialUpdating():
     def passive_updaters_avg_credence(self) -> Optional[float]:
         if not self.passive_updaters:
             return None
-        avg_credence = np.mean([a.credence for a in self.passive_updaters])
-        return round(float(avg_credence), 3)
-
+        return np.mean([a.credence for a in self.passive_updaters])
+        
     ## Private methods
     # TODO: The influencer logic can probably be made more generic
     def _add_all_bayes_influencers_for_updater(self,

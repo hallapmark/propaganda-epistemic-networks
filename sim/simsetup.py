@@ -52,7 +52,7 @@ class ENSimSetup():
                 raise NotImplementedError
             case ENSimType.PROPAGANDA_CYCLE:
                 configs = [ENParams(pop, ENetworkType.CYCLE, 10, 0.05, 0.5, 10000, 0.99, ENPassiveUpdatersConfig(2, 0, 0.5, infl_count), True)  for pop in (20,) 
-                                                                                                                                                for infl_count in range(1, pop+1)]
+                                                                                                                                                for infl_count in range(1, 12)]
                 self.setup_sims(configs, "policymakers_cycle.csv") 
             case ENSimType.COUNTER_PROPAGANDA_COMPLETE:
                 raise NotImplementedError
@@ -99,7 +99,7 @@ class ENSimSetup():
         passive_upd_averages = [res.passive_updaters_avg_credence for res in results if res.passive_updaters_avg_credence]
         passive_cr = "N/A"
         if passive_upd_averages:
-            passive_cr = np.mean(passive_upd_averages)
+            passive_cr = round(np.mean(passive_upd_averages), 3)
         sims_summary = ENResultsSummary(str(proportion_consensus_reached), str(avg_consensus_round), str(passive_cr))
         return ENSimsSummary(params, sims_summary)
 
