@@ -1,18 +1,26 @@
 from agents.experimenters.binomialexperimenter import *
-from network.network import ENetworkForBinomialUpdating
 from typing import List
 
-class SelectiveSharingPropagandist(BinomialExperimenter):
-    def __init__(self, scientists: List[BinomialExperimenter]):
-        self.scientists = scientists
+class SelectiveSharingPropagandist():
+    def __init__(self):
+        self.scientists: list[BinomialExperimenter] = []
+
+    def add_scientist(self, scientist: BinomialExperimenter):
+        self.scientists.append(scientist)
 
     # BinomialExperimenter implementation
-    def get_experiment_data(self) -> Optional[BinomialExperiment]:
+    def get_experiment_data(self) -> Optional[List[BinomialExperiment]]:
+        if not self.scientists:
+            return None
         experiments = [scientist.get_experiment_data() for scientist in self.scientists]
         experiments = [experiment for experiment in experiments if experiment]
+        if not experiments:
+            return None
+        # NB this assumes that hypothesis A (which is to be promoted) is 0.5 - epsilon, and B is 0.5 + epsilon.
+        experiments = [experiment for experiment in experiments if experiment.k / experiment.n < 0.5]
         if experiments:
             # Get the lowest evidence for B (i.e. highest evidence for A)
-            return min(experiments, key = lambda exp: exp.k)
+            return experiments
         else:
             return None
         # TODO: Implement safety. SelectiveSharingPropagandist cannot handle networks 
