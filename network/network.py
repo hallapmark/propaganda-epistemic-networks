@@ -1,5 +1,6 @@
 from agents.binomialethicalscientist import BinomialEthicalScientist
 from agents.bayesianupdaters.bayesianbinomialupdater import BayesianBinomialUpdater
+from agents.experimenters.binomialexperimenter import BinomialExperiment
 from agents.selective_sharing_propagandist import SelectiveSharingPropagandist
 from sim.sim_models import *
 import numpy as np
@@ -14,7 +15,7 @@ class ENetworkForBinomialUpdating():
                  epsilon: float,
                  scientist_stop_threshold: float,
                  passive_updaters_config: Optional[ENPassiveUpdatersConfig],
-                 selective_sharing_propagandist_active: bool):
+                 selective_propagandist_active: bool):
         self.scientist_popcount = scientist_popcount
         self.scientist_network_type = scientist_network_type
         self.scientists = [BinomialEthicalScientist(
@@ -30,7 +31,7 @@ class ENetworkForBinomialUpdating():
         self.passive_updaters: Optional[List[BayesianBinomialUpdater]] = None
         if passive_updaters_config:
             self._passive_udpaters_init(passive_updaters_config, epsilon, rng)
-        self.propagandist = SelectiveSharingPropagandist() if propagandist_active else None
+        self.propagandist = SelectiveSharingPropagandist() if selective_propagandist_active else None
         if self.propagandist:
             self._propagandist_init(self.propagandist)
 

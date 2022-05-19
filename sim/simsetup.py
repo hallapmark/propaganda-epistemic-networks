@@ -113,7 +113,7 @@ class ENSimSetup():
                 max_research_rounds: int,
                 consensus_threshold: float,
                 passive_updaters_config: Optional[ENPassiveUpdatersConfig],
-                propagandist_active: bool) -> Optional[ENSimulationRawResults]:
+                selective_propagandist_active: bool) -> Optional[ENSimulationRawResults]:
         network = ENetworkForBinomialUpdating(rng,
                                               scientist_pop_count,
                                               network_type,
@@ -121,7 +121,7 @@ class ENSimSetup():
                                               epsilon,
                                               scientist_stop_threshold,
                                               passive_updaters_config,
-                                              propagandist_active)
+                                              selective_propagandist_active)
         simulation = EpistemicNetworkSimulation(network, 
                                                 max_research_rounds, 
                                                 scientist_stop_threshold, 

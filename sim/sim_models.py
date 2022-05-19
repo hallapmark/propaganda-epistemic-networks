@@ -19,7 +19,7 @@ class ENParams(NamedTuple):
     max_research_rounds_allowed: int
     consensus_threshold: float
     passive_updaters_config: Optional[ENPassiveUpdatersConfig] # E.g. policymakers
-    selective_sharing_propagandist_active: bool
+    selective_propagandist_active: bool
 
 class ENSimulationRawResults(NamedTuple):
     consensus_round: Optional[int]
