@@ -64,11 +64,11 @@ class ENSimSetup():
         # we will get the *same* results each simulation since the subprocesses share the parent's initial 
         # rng state.
         # https://numpy.org/doc/stable/reference/random/parallel.html
-        child_seeds = np.random.SeedSequence(25359).spawn(self.sim_count)
-        rng_streams = [np.random.default_rng(s) for s in child_seeds]
-        for param_config in configs:
+        child_seeds = [np.random.SeedSequence(253 + i).spawn(self.sim_count) for i in range(len(configs))]
+        for i, param_config in enumerate(configs):
             print(f'Running config: {param_config}')
             print('...')
+            rng_streams = [np.random.default_rng(s) for s in child_seeds[i]]
             start_time = timeit.default_timer()
             results_summary = self.run_sims_for_param_config(param_config, rng_streams)
             time_elapsed = timeit.default_timer() - start_time
