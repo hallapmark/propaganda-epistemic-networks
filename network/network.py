@@ -28,7 +28,7 @@ class ENetworkForBinomialUpdating():
             # TODO: Wouldn't it be a good idea to exclude 0 as well? 
             ) for _ in range(scientist_popcount)]
         self._structure_scientific_network(self.scientists, scientist_network_type)
-        self.passive_updaters: Optional[List[BayesianBinomialUpdater]] = None
+        self.passive_updaters: list[BayesianBinomialUpdater] = []
         if passive_updaters_config:
             self._passive_udpaters_init(passive_updaters_config, epsilon, rng)
         self.propagandist = SelectiveSharingPropagandist() if selective_propagandist_active else None
