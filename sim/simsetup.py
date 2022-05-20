@@ -17,8 +17,7 @@ class ENSimType(Enum):
     POLICYMAKERS_CYCLE = auto()
     PROPAGANDA_COMPLETE = auto()
     PROPAGANDA_CYCLE = auto()
-    COUNTER_PROPAGANDA_COMPLETE = auto()
-    COUNTER_PROPAGANDA_CYCLE = auto()
+    PROPAGANDA_CYCLE_VARY_EPSILON = auto()
 
 class ENSimSetup():
     def __init__(self,
@@ -49,15 +48,16 @@ class ENSimSetup():
                                                                                                                                                 for infl_count in range(1, pop+1)]
                 self.setup_sims(configs, "policymakers_cycle.csv")                                          
             case ENSimType.PROPAGANDA_COMPLETE:
-                raise NotImplementedError
+                configs = [ENParams(pop, ENetworkType.COMPLETE, 10, 0.05, 0.5, 10000, 0.99, ENPassiveUpdatersConfig(1, 0.0001, 0.5, infl_count), True)  for pop in (20,) 
+                                                                                                                                                        for infl_count in range(1, pop+1)]
+                self.setup_sims(configs, "policymakers_cycle.csv")
             case ENSimType.PROPAGANDA_CYCLE:
                 configs = [ENParams(pop, ENetworkType.CYCLE, 10, 0.05, 0.5, 10000, 0.99, ENPassiveUpdatersConfig(1, 0.0001, 0.5, infl_count), True)     for pop in (20,) 
                                                                                                                                                         for infl_count in range(1, pop+1)]
                 self.setup_sims(configs, "policymakers_cycle.csv") 
-            case ENSimType.COUNTER_PROPAGANDA_COMPLETE:
-                raise NotImplementedError
-            case ENSimType.COUNTER_PROPAGANDA_CYCLE:
-                raise NotImplementedError
+            case PROPAGANDA_CYCLE_VARY_EPSILON:
+                configs = [ENParams(20, ENetworkType.CYCLE, 10, epsilon, 0.5, 10000, 0.99, ENPassiveUpdatersConfig(1, 0.0001, 0.5, 10), True) for epsilon in (0.01, 0.05, 0.075, 0.1)]
+                self.setup_sims(configs, "policymakers_cycle.csv")
 
     def setup_sims(self, configs: List[ENParams], output_filename: str):
         # We need to be careful when passing rng instances to starmap. If we do not set independent seeds, 
